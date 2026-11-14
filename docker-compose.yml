@@ -1,0 +1,15 @@
+services:                  # lista dos containers que o projeto usa
+  db:                      # nome do serviço (você escolhe)
+    image: postgres:16     # qual imagem usar
+    container_name: finansee-db   # nome do container, para achá-lo fácil
+    environment:           # variáveis de ambiente que a imagem lê ao iniciar
+      POSTGRES_DB: finansee        # cria um banco chamado "finansee"
+      POSTGRES_USER: finansee      # cria esse usuário
+      POSTGRES_PASSWORD: finansee  # define a senha dele
+    ports:
+      - "5432:5432"        # porta-da-sua-máquina : porta-dentro-do-container
+    volumes:
+      - finansee-data:/var/lib/postgresql/data  # guarda os dados do banco no volume
+
+volumes:
+  finansee-data:           # declara o volume usado acima

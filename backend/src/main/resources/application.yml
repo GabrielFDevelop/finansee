@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: finansee-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finansee
+    username: finansee
+    password: finansee
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+
+  flyway:
+    enabled: true
