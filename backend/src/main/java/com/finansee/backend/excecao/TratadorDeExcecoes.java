@@ -40,4 +40,9 @@ public class TratadorDeExcecoes {
     problema.setProperty("erros", erros);
     return problema;
   }
+
+  @ExceptionHandler(RequisicaoInvalidaException.class)
+  public ProblemDetail requisicaoInvalida(RequisicaoInvalidaException ex) {
+    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+  }
 }
