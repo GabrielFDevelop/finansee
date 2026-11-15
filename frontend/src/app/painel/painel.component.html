@@ -1,0 +1,78 @@
+<main class="pagina">
+  <header class="topo">
+    <div class="marca"><span class="marca__ponto">●</span> Finansee</div>
+    <div class="navegacao-mes">
+      <button type="button" class="botao-icone" aria-label="Mês anterior" (click)="mudarMes(-1)">‹</button>
+      <strong>{{ rotuloMes() }}</strong>
+      <button type="button" class="botao-icone" aria-label="Próximo mês" (click)="mudarMes(1)">›</button>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="aviso" role="alert">{{ erro() }}</p>
+  }
+
+  @if (carregando() && !resumo()) {
+    <p class="aviso">Carregando…</p>
+  }
+
+  @if (resumo(); as r) {
+    <div class="grade">
+      <section class="cartao grade__principal">
+        <h2>Gastos por categoria</h2>
+
+        @if (r.porCategoria.length > 0) {
+          <div class="categorias">
+            <div class="rosca" [style.background]="gradiente()" aria-hidden="true">
+              <div class="rosca__miolo">
+                <span>Total<br /><strong>{{ r.totalGasto | currency: 'BRL' }}</strong></span>
+              </div>
+            </div>
+
+            <ul class="legenda">
+              @for (c of r.porCategoria; track c.categoriaId; let i = $index) {
+                <li>
+                  <span><i [style.background]="cor(i)"></i>{{ c.categoriaNome }}</span>
+                  <strong>{{ c.total | currency: 'BRL' }}</strong>
+                </li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <p class="vazio">Nenhuma despesa neste mês.</p>
+        }
+      </section>
+
+      <div class="coluna">
+        <section class="cartao">
+          <p class="rotulo">Total gasto no mês</p>
+          <p class="total">{{ r.totalGasto | currency: 'BRL' }}</p>
+          <p class="rotulo">
+            {{ r.quantidadeDespesas }} {{ r.quantidadeDespesas === 1 ? 'despesa' : 'despesas' }}
+          </p>
+        </section>
+
+        <section class="cartao">
+          <div class="cartao__cabecalho">
+            <h2>Últimas despesas</h2>
+            <button type="button" class="botao-primario">+ Nova despesa</button>
+          </div>
+
+          <ul class="lista">
+            @for (d of ultimas(); track d.id) {
+              <li class="despesa">
+                <span>
+                  {{ d.descricao }}
+                  <small>{{ d.categoriaNome }} · {{ d.data | date: 'dd/MM' }}</small>
+                </span>
+                <strong>{{ d.valor | currency: 'BRL' }}</strong>
+              </li>
+            } @empty {
+              <li class="vazio">Nenhuma despesa registrada.</li>
+            }
+          </ul>
+        </section>
+      </div>
+    </div>
+  }
+</main>

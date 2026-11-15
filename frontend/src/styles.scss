@@ -1,1 +1,35 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --cor-fundo: #02040f;
+  --cor-cartao: #070c26;
+  --cor-borda: #16215a;
+  --cor-texto: #eaf0ff;
+  --cor-texto-suave: #9aa7cc;
+  --cor-destaque: #3048d0;
+
+  // paleta das categorias (o painel repete a sequência se houver mais de 7)
+  --cat-1: #7db2ff;
+  --cat-2: #5eead4;
+  --cat-3: #f472b6;
+  --cat-4: #fbbf24;
+  --cat-5: #94a3b8;
+  --cat-6: #a78bfa;
+  --cat-7: #fb923c;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}

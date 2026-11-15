@@ -1,0 +1,182 @@
+.pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 40px;
+}
+
+.topo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.marca {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+
+  &__ponto {
+    color: var(--cor-destaque);
+  }
+}
+
+.navegacao-mes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.botao-icone {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+  background: var(--cor-cartao);
+  color: var(--cor-texto);
+  font-size: 18px;
+}
+
+.botao-primario {
+  height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--cor-destaque);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.aviso,
+.vazio {
+  color: var(--cor-texto-suave);
+}
+
+.grade {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+
+  &__principal {
+    flex: 1 1 380px;
+  }
+}
+
+.coluna {
+  flex: 1 1 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.cartao {
+  background: var(--cor-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: 18px;
+  padding: 24px;
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+
+  &__cabecalho {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.rotulo {
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: 14px;
+}
+
+.total {
+  margin: 4px 0;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.rosca {
+  display: grid;
+  place-items: center;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+
+  &__miolo {
+    display: grid;
+    place-items: center;
+    width: 132px;
+    height: 132px;
+    border-radius: 50%;
+    background: var(--cor-cartao);
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+    text-align: center;
+
+    strong {
+      font-size: 19px;
+      color: var(--cor-texto);
+    }
+  }
+}
+
+.legenda {
+  flex: 1 1 180px;
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+  }
+
+  i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 10px;
+    border-radius: 50%;
+  }
+}
+
+.lista {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.despesa {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 14px;
+
+  small {
+    display: block;
+    color: var(--cor-texto-suave);
+    font-size: 12px;
+  }
+}

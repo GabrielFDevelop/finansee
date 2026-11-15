@@ -1,3 +1,8 @@
 import { Routes } from '@angular/router';
 
-export const routes: Routes = [];
+import { PainelComponent } from './painel/painel.component';
+
+export const routes: Routes = [
+  { path: '', component: PainelComponent },
+  { path: '**', redirectTo: '' },
+];
