@@ -55,7 +55,7 @@
         <section class="cartao">
           <div class="cartao__cabecalho">
             <h2>Últimas despesas</h2>
-            <button type="button" class="botao-primario">+ Nova despesa</button>
+            <button type="button" class="botao-primario" (click)="formulario.abrir()">+ Nova despesa</button>
           </div>
 
           <ul class="lista">
@@ -75,4 +75,5 @@
       </div>
     </div>
   }
+  <app-form-despesa #formulario (salva)="carregar()" />
 </main>

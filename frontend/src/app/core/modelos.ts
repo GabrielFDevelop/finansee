@@ -21,3 +21,15 @@ export interface Despesa {
   categoriaId: number;
   categoriaNome: string;
 }
+
+export interface Categoria {
+  id: number;
+  nome: string;
+}
+
+export interface DespesaRequest {
+  descricao: string;
+  valor: number;
+  data: string; // "2026-11-15"
+  categoriaId: number;
+}

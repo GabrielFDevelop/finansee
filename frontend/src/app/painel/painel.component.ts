@@ -5,10 +5,11 @@ import { forkJoin } from 'rxjs';
 import { DespesaService } from '../core/despesa.service';
 import { Despesa, ResumoMensal } from '../core/modelos';
 import { ResumoService } from '../core/resumo.service';
+import { FormDespesaComponent } from './form-despesa/form-despesa.component';
 
 @Component({
   selector: 'app-painel',
-  imports: [CurrencyPipe, DatePipe],
+  imports: [CurrencyPipe, DatePipe, FormDespesaComponent],
   templateUrl: './painel.component.html',
   styleUrl: './painel.component.scss',
 })
@@ -61,7 +62,7 @@ export class PainelComponent implements OnInit {
     return `var(--cat-${(indice % 7) + 1})`;
   }
 
-  private carregar(): void {
+  protected carregar(): void {
     this.carregando.set(true);
     this.erro.set(null);
 

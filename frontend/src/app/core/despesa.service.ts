@@ -3,8 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { API_URL } from './api';
-import { Despesa } from './modelos';
-
+import { Despesa, DespesaRequest } from './modelos';
 @Injectable({ providedIn: 'root' })
 export class DespesaService {
   private readonly http = inject(HttpClient);
@@ -12,5 +11,9 @@ export class DespesaService {
   listar(ano: number, mes: number): Observable<Despesa[]> {
     const params = new HttpParams().set('ano', ano).set('mes', mes);
     return this.http.get<Despesa[]>(`${API_URL}/despesas`, { params });
+  }
+
+  criar(dados: DespesaRequest): Observable<Despesa> {
+    return this.http.post<Despesa>(`${API_URL}/despesas`, dados);
   }
 }
