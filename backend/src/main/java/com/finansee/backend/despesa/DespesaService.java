@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.finansee.backend.categoria.Categoria;
 import com.finansee.backend.categoria.CategoriaRepository;
+import com.finansee.backend.comum.PeriodoMensal;
 import com.finansee.backend.excecao.RecursoNaoEncontradoException;
-import com.finansee.backend.excecao.RequisicaoInvalidaException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +22,7 @@ public class DespesaService {
 
   @Transactional(readOnly = true)
   public List<DespesaResponse> listarPorMes(Integer ano, Integer mes) {
-    YearMonth periodo = resolverPeriodo(ano, mes);
+    YearMonth periodo = PeriodoMensal.resolver(ano, mes);
     return despesaRepository
         .buscarPorPeriodo(periodo.atDay(1), periodo.atEndOfMonth())
         .stream()
@@ -63,19 +63,6 @@ public class DespesaService {
     despesa.setValor(request.valor());
     despesa.setData(request.data());
     despesa.setCategoria(categoria);
-  }
-
-  private YearMonth resolverPeriodo(Integer ano, Integer mes) {
-    if (ano == null && mes == null) {
-      return YearMonth.now();
-    }
-    if (ano == null || mes == null) {
-      throw new RequisicaoInvalidaException("Informe ano e mês juntos");
-    }
-    if (mes < 1 || mes > 12) {
-      throw new RequisicaoInvalidaException("O mês deve estar entre 1 e 12");
-    }
-    return YearMonth.of(ano, mes);
   }
 
   private Despesa buscarEntidade(Long id) {
