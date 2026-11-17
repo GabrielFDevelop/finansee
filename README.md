@@ -1,2 +1,227 @@
-# finansee
-Aplicação voltada para gerenciamento de gastos.
+# Finansee
+
+Aplicação web para **gerenciar gastos mensais**: registre despesas, organize por categoria, defina um orçamento para cada mês e acompanhe tudo em um painel.
+
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API%20REST-6DB33F)
+![Angular](https://img.shields.io/badge/Angular-front--end-DD0031)
+![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-336791)
+
+> Projeto pessoal de estudo, em desenvolvimento. Por enquanto é de **um único usuário**, sem login.
+
+## Capturas de tela
+
+![Painel do mês](docs/painel.png)
+
+## Funcionalidades
+
+- **Painel do mês:** total gasto, gráfico de rosca por categoria, últimas despesas e uso do orçamento.
+- **Despesas:** cadastro, listagem do mês, edição e exclusão.
+- **Categorias:** criar, renomear e excluir. Uma categoria em uso (com despesas ou orçamento) não pode ser excluída.
+- **Orçamento mensal:** limite por categoria e por mês, com barra de progresso que muda de cor ao chegar em 80% do limite e ao ultrapassá-lo.
+- **Navegação por mês** compartilhada entre as telas.
+
+## Tecnologias
+
+| Camada | Tecnologias |
+|---|---|
+| Front-end | Angular (componentes standalone, signals, Reactive Forms), RxJS, TypeScript, SCSS |
+| Back-end | Java 21, Spring Boot (Web, Data JPA, Validation), Lombok, Maven |
+| Banco de dados | PostgreSQL 16, migrations com Flyway |
+| Infraestrutura | Docker Compose (banco de dados em desenvolvimento) |
+
+## Arquitetura
+
+```mermaid
+flowchart LR
+    A["Angular<br/>localhost:4200"] -->|"HTTP / JSON"| B["API Spring Boot<br/>localhost:8080"]
+    B -->|"JPA / JDBC"| C[("PostgreSQL 16<br/>Docker, porta 5432")]
+```
+
+## Estrutura do repositório
+
+```
+finansee/
+├── backend/                 # API REST (Spring Boot)
+│   └── src/main/
+│       ├── java/com/finansee/backend/
+│       │   ├── categoria/   # entidade, repository, service, controller e DTOs
+│       │   ├── despesa/
+│       │   ├── orcamento/
+│       │   ├── resumo/      # resumo mensal (totais, por categoria, orçamento)
+│       │   ├── comum/       # utilitários compartilhados
+│       │   ├── config/      # CORS
+│       │   └── excecao/     # exceções e tratamento de erros
+│       └── resources/
+│           ├── application.yml
+│           └── db/migration/    # migrations do Flyway
+├── frontend/                # aplicação Angular
+│   └── src/app/
+│       ├── cabecalho/       # menu e seletor de mês
+│       ├── compartilhado/   # componentes usados em mais de uma tela
+│       ├── core/            # services, modelos e configuração da API
+│       ├── painel/
+│       ├── despesas/
+│       ├── categorias/
+│       └── orcamento/
+├── docker-compose.yml       # PostgreSQL para desenvolvimento
+└── README.md
+```
+
+## Como executar
+
+### Pré-requisitos
+
+- [Git](https://git-scm.com)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- JDK 21
+- [Node.js](https://nodejs.org) (versão LTS) e npm
+- Angular CLI: `npm install -g @angular/cli`
+
+### Passo a passo
+
+**1. Clonar o repositório**
+
+```bash
+git clone https://github.com/GabrielFDevelop/finansee.git
+cd finansee
+```
+
+**2. Subir o banco de dados** (na raiz do projeto, com o Docker Desktop aberto)
+
+```bash
+docker compose up -d
+```
+
+**3. Subir o back-end** (em um terminal)
+
+```bash
+cd backend
+./mvnw spring-boot:run
+```
+
+No Windows (PowerShell), use `.\mvnw.cmd spring-boot:run`.
+
+Na primeira execução, o Flyway cria as tabelas e insere as categorias padrão automaticamente.
+
+**4. Subir o front-end** (em outro terminal)
+
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+### Endereços
+
+| Serviço | Endereço |
+|---|---|
+| Aplicação (Angular) | http://localhost:4200 |
+| API (Spring Boot) | http://localhost:8080/api |
+| PostgreSQL | `localhost:5432`, banco, usuário e senha: `finansee` |
+
+> As credenciais do banco são apenas para **desenvolvimento local**. Em produção, elas devem vir de variáveis de ambiente, nunca do repositório.
+
+### Parar
+
+- Back-end e front-end: `Ctrl + C` no terminal de cada um.
+- Banco, preservando os dados: `docker compose stop`.
+- Remover o container (os dados continuam no volume): `docker compose down`.
+- Remover também os dados: `docker compose down -v`.
+
+## API
+
+| Recurso | Endpoints |
+|---|---|
+| Categorias | `GET /api/categorias`, `GET /api/categorias/{id}`, `POST /api/categorias`, `PUT /api/categorias/{id}`, `DELETE /api/categorias/{id}` |
+| Despesas | `GET /api/despesas?ano=&mes=`, `GET /api/despesas/{id}`, `POST /api/despesas`, `PUT /api/despesas/{id}`, `DELETE /api/despesas/{id}` |
+| Resumo mensal | `GET /api/resumo?ano=&mes=` |
+| Orçamento | `GET /api/orcamentos?ano=&mes=`, `PUT /api/orcamentos/{ano}/{mes}/{categoriaId}`, `DELETE /api/orcamentos/{ano}/{mes}/{categoriaId}` |
+
+Quando `ano` e `mes` não são informados, a API usa o mês atual.
+
+Exemplo, definindo um limite de R$ 900,00 para a categoria 1 em novembro de 2026:
+
+```http
+PUT /api/orcamentos/2026/11/1
+Content-Type: application/json
+
+{ "valorLimite": 900.00 }
+```
+
+Os erros seguem o formato `ProblemDetail` (RFC 9457):
+
+| Status | Quando acontece |
+|---|---|
+| `400` | Dados inválidos (a resposta traz a lista `erros` por campo), mês fora de 1 a 12, ano fora do intervalo permitido |
+| `404` | Despesa, categoria ou orçamento inexistente |
+| `409` | Nome de categoria duplicado ou categoria em uso |
+
+## Banco de dados
+
+```mermaid
+erDiagram
+    CATEGORIA ||--o{ DESPESA : "possui"
+    CATEGORIA ||--o{ ORCAMENTO_MENSAL : "tem limite em"
+
+    CATEGORIA {
+        bigint id PK
+        varchar nome UK
+        timestamp criada_em
+    }
+    DESPESA {
+        bigint id PK
+        varchar descricao
+        numeric valor
+        date data
+        bigint categoria_id FK
+        timestamp criada_em
+    }
+    ORCAMENTO_MENSAL {
+        bigint id PK
+        smallint ano
+        smallint mes
+        numeric valor_limite
+        bigint categoria_id FK
+    }
+```
+
+O esquema é versionado com **Flyway**, em `backend/src/main/resources/db/migration/`:
+
+- `V1__criar_tabelas.sql`: cria as tabelas, restrições e índices.
+- `V2__inserir_categorias_padrao.sql`: insere as categorias iniciais.
+
+Uma migration já aplicada nunca é editada. Mudanças no banco entram como uma nova versão (`V3__...`, `V4__...`).
+
+## Decisões de projeto
+
+- **Dinheiro com precisão exata:** `NUMERIC(12,2)` no banco e `BigDecimal` no Java, evitando erros de arredondamento do ponto flutuante.
+- **Schema controlado pelo Flyway:** o Hibernate apenas valida (`ddl-auto: validate`) se as entidades batem com o banco.
+- **DTOs separados das entidades:** a API não expõe o modelo do banco. A validação acontece na API (Bean Validation) e também no banco (`CHECK`).
+- **Erros padronizados:** um tratador global converte exceções em respostas `ProblemDetail`.
+- **Orçamento idempotente:** o `PUT` identifica o limite por ano, mês e categoria, então repetir a chamada atualiza em vez de duplicar.
+- **Consultas eficientes:** `join fetch` evita o problema N+1, e as somas por categoria são feitas no banco.
+- **Front-end reativo:** signals para o estado dos componentes e RxJS com `switchMap`, que cancela requisições antigas quando o mês muda.
+- **Sem biblioteca de componentes:** estilos próprios em SCSS, com cores definidas como variáveis CSS, tema escuro, modais com `<dialog>` nativo e atenção à acessibilidade (rótulos, `aria-label`, barras de progresso semânticas).
+
+## Convenções de commit
+
+O projeto segue o padrão [Conventional Commits](https://www.conventionalcommits.org/pt-br/):
+
+| Prefixo | Uso |
+|---|---|
+| `feat:` | funcionalidade nova |
+| `fix:` | correção de bug |
+| `refactor:` | reorganização de código sem mudar o comportamento |
+| `docs:` | documentação |
+| `chore:` | configuração e tarefas de manutenção |
+
+## Próximos passos
+
+- [ ] Dockerizar a aplicação inteira (back-end e front-end no docker-compose)
+
+## Autor
+
+**Gabriel Assis de Freitas**
+
+[LinkedIn](https://www.linkedin.com/in/gabriel-freitas-467b10297/)
