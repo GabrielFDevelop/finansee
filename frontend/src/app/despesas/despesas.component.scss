@@ -27,21 +27,3 @@
     white-space: nowrap;
   }
 }
-
-.botao-link {
-  min-height: 44px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 8px;
-  background: none;
-  color: var(--cat-1);
-  font-size: 14px;
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  &--perigo {
-    color: #fda4af;
-  }
-}
