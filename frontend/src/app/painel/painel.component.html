@@ -1,13 +1,4 @@
-<main class="pagina">
-  <header class="topo">
-    <div class="marca"><span class="marca__ponto">●</span> Finansee</div>
-    <div class="navegacao-mes">
-      <button type="button" class="botao-icone" aria-label="Mês anterior" (click)="mudarMes(-1)">‹</button>
-      <strong>{{ rotuloMes() }}</strong>
-      <button type="button" class="botao-icone" aria-label="Próximo mês" (click)="mudarMes(1)">›</button>
-    </div>
-  </header>
-
+<main class="container pagina">
   @if (erro()) {
     <p class="aviso" role="alert">{{ erro() }}</p>
   }
@@ -75,5 +66,5 @@
       </div>
     </div>
   }
-  <app-form-despesa #formulario (salva)="carregar()" />
+  <app-form-despesa #formulario (salva)="recarregar()" />
 </main>

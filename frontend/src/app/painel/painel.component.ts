@@ -1,11 +1,15 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  BehaviorSubject, EMPTY, catchError, combineLatest, forkJoin, switchMap, tap,
+} from 'rxjs';
 
 import { DespesaService } from '../core/despesa.service';
+import { MesService } from '../core/mes.service';
 import { Despesa, ResumoMensal } from '../core/modelos';
 import { ResumoService } from '../core/resumo.service';
-import { FormDespesaComponent } from './form-despesa/form-despesa.component';
+import { FormDespesaComponent } from '../compartilhado/form-despesa/form-despesa.component';
 
 @Component({
   selector: 'app-painel',
@@ -13,24 +17,16 @@ import { FormDespesaComponent } from './form-despesa/form-despesa.component';
   templateUrl: './painel.component.html',
   styleUrl: './painel.component.scss',
 })
-export class PainelComponent implements OnInit {
+export class PainelComponent {
+  private readonly mes = inject(MesService);
   private readonly resumoService = inject(ResumoService);
   private readonly despesaService = inject(DespesaService);
-
-  private readonly hoje = new Date();
-  protected readonly ano = signal(this.hoje.getFullYear());
-  protected readonly mes = signal(this.hoje.getMonth() + 1);
+  private readonly recarregar$ = new BehaviorSubject<void>(undefined);
 
   protected readonly resumo = signal<ResumoMensal | null>(null);
   protected readonly despesas = signal<Despesa[]>([]);
-  protected readonly carregando = signal(false);
+  protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
-
-  protected readonly rotuloMes = computed(() => {
-    const data = new Date(this.ano(), this.mes() - 1, 1);
-    const texto = data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-    return texto.charAt(0).toUpperCase() + texto.slice(1);
-  });
 
   protected readonly ultimas = computed(() => this.despesas().slice(0, 5));
 
@@ -47,38 +43,39 @@ export class PainelComponent implements OnInit {
     return `conic-gradient(${trechos.join(', ')})`;
   });
 
-  ngOnInit(): void {
-    this.carregar();
+  constructor() {
+    combineLatest([this.mes.periodo$, this.recarregar$])
+      .pipe(
+        tap(() => {
+          this.carregando.set(true);
+          this.erro.set(null);
+        }),
+        switchMap(([{ ano, mes }]) =>
+          forkJoin({
+            resumo: this.resumoService.buscar(ano, mes),
+            despesas: this.despesaService.listar(ano, mes),
+          }).pipe(
+            catchError(() => {
+              this.erro.set('Não foi possível carregar os dados. Verifique se a API está no ar.');
+              this.carregando.set(false);
+              return EMPTY;
+            }),
+          ),
+        ),
+        takeUntilDestroyed(),
+      )
+      .subscribe(({ resumo, despesas }) => {
+        this.resumo.set(resumo);
+        this.despesas.set(despesas);
+        this.carregando.set(false);
+      });
   }
 
-  protected mudarMes(delta: number): void {
-    const data = new Date(this.ano(), this.mes() - 1 + delta, 1);
-    this.ano.set(data.getFullYear());
-    this.mes.set(data.getMonth() + 1);
-    this.carregar();
+  protected recarregar(): void {
+    this.recarregar$.next();
   }
 
   protected cor(indice: number): string {
     return `var(--cat-${(indice % 7) + 1})`;
-  }
-
-  protected carregar(): void {
-    this.carregando.set(true);
-    this.erro.set(null);
-
-    forkJoin({
-      resumo: this.resumoService.buscar(this.ano(), this.mes()),
-      despesas: this.despesaService.listar(this.ano(), this.mes()),
-    }).subscribe({
-      next: ({ resumo, despesas }) => {
-        this.resumo.set(resumo);
-        this.despesas.set(despesas);
-        this.carregando.set(false);
-      },
-      error: () => {
-        this.erro.set('Não foi possível carregar os dados. Verifique se a API está no ar.');
-        this.carregando.set(false);
-      },
-    });
   }
 }

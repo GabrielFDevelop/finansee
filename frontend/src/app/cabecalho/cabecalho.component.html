@@ -1,0 +1,16 @@
+<header class="container topo">
+  <div class="topo__esquerda">
+    <div class="marca"><span class="marca__ponto">●</span> Finansee</div>
+
+    <nav class="menu" aria-label="Principal">
+      <a routerLink="/" routerLinkActive="menu__ativo" [routerLinkActiveOptions]="{ exact: true }">Painel</a>
+      <a routerLink="/despesas" routerLinkActive="menu__ativo">Despesas</a>
+    </nav>
+  </div>
+
+  <div class="navegacao-mes">
+    <button type="button" class="botao-icone" aria-label="Mês anterior" (click)="mes.mudar(-1)">‹</button>
+    <strong>{{ mes.rotulo$ | async }}</strong>
+    <button type="button" class="botao-icone" aria-label="Próximo mês" (click)="mes.mudar(1)">›</button>
+  </div>
+</header>
