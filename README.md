@@ -28,7 +28,7 @@ Aplicação web para **gerenciar gastos mensais**: registre despesas, organize p
 | Front-end | Angular (componentes standalone, signals, Reactive Forms), RxJS, TypeScript, SCSS |
 | Back-end | Java 21, Spring Boot (Web, Data JPA, Validation), Lombok, Maven |
 | Banco de dados | PostgreSQL 16, migrations com Flyway |
-| Infraestrutura | Docker Compose (banco de dados em desenvolvimento) |
+| Infraestrutura | Docker Compose (banco, API e front-end com nginx) |
 
 ## Arquitetura
 
@@ -42,29 +42,38 @@ flowchart LR
 
 ```
 finansee/
-├── backend/                 # API REST (Spring Boot)
+├── backend/                          # API REST (Spring Boot)
+│   ├── Dockerfile                    # imagem do back-end (build em 2 estágios)
+│   ├── .dockerignore
+│   ├── pom.xml                       # dependências e build (Maven)
 │   └── src/main/
 │       ├── java/com/finansee/backend/
-│       │   ├── categoria/   # entidade, repository, service, controller e DTOs
+│       │   ├── categoria/            # entidade, repository, service, controller e DTOs
 │       │   ├── despesa/
 │       │   ├── orcamento/
-│       │   ├── resumo/      # resumo mensal (totais, por categoria, orçamento)
-│       │   ├── comum/       # utilitários compartilhados
-│       │   ├── config/      # CORS
-│       │   └── excecao/     # exceções e tratamento de erros
+│       │   ├── resumo/               # resumo mensal (totais, por categoria, orçamento)
+│       │   ├── comum/                # utilitários compartilhados
+│       │   ├── config/               # CORS
+│       │   └── excecao/              # exceções e tratamento de erros
 │       └── resources/
 │           ├── application.yml
-│           └── db/migration/    # migrations do Flyway
-├── frontend/                # aplicação Angular
+│           └── db/migration/         # migrations do Flyway
+├── frontend/                         # aplicação Angular
+│   ├── Dockerfile                    # imagem do front-end (build + nginx)
+│   ├── nginx.conf                    # serve o Angular e repassa /api ao back-end
+│   ├── .dockerignore
+│   ├── proxy.conf.json               # proxy do ng serve para a API local
 │   └── src/app/
-│       ├── cabecalho/       # menu e seletor de mês
-│       ├── compartilhado/   # componentes usados em mais de uma tela
-│       ├── core/            # services, modelos e configuração da API
+│       ├── cabecalho/                # menu e seletor de mês
+│       ├── compartilhado/            # componentes usados em mais de uma tela
+│       ├── core/                     # services, modelos e endereço da API
 │       ├── painel/
 │       ├── despesas/
 │       ├── categorias/
 │       └── orcamento/
-├── docker-compose.yml       # PostgreSQL para desenvolvimento
+├── docs/                             # imagens usadas no README
+├── .env.example                      # modelo das variáveis do banco (copie para .env)
+├── docker-compose.yml                # banco, API e front-end
 └── README.md
 ```
 
@@ -87,13 +96,27 @@ git clone https://github.com/GabrielFDevelop/finansee.git
 cd finansee
 ```
 
-**2. Subir o banco de dados** (na raiz do projeto, com o Docker Desktop aberto)
+### Opção A: tudo com Docker
 
 ```bash
-docker compose up -d
+cp .env.example .env
+docker compose up -d --build
 ```
 
-**3. Subir o back-end** (em um terminal)
+No Windows (PowerShell), troque o `cp` por `Copy-Item .env.example .env`.
+
+A aplicação fica em http://localhost:8081. Na primeira vez, o build leva alguns minutos.
+
+### Opção B: desenvolvimento (banco no Docker, aplicações locais)
+
+**1. Subir o banco**
+
+```bash
+cp .env.example .env
+docker compose up -d db
+```
+
+**2. Subir o back-end** (em um terminal)
 
 ```bash
 cd backend
@@ -102,9 +125,7 @@ cd backend
 
 No Windows (PowerShell), use `.\mvnw.cmd spring-boot:run`.
 
-Na primeira execução, o Flyway cria as tabelas e insere as categorias padrão automaticamente.
-
-**4. Subir o front-end** (em outro terminal)
+**3. Subir o front-end** (em outro terminal)
 
 ```bash
 cd frontend
@@ -112,15 +133,17 @@ npm install
 ng serve
 ```
 
+O `ng serve` encaminha as chamadas `/api` para o back-end local (`proxy.conf.json`).
+
 ### Endereços
 
-| Serviço | Endereço |
-|---|---|
-| Aplicação (Angular) | http://localhost:4200 |
-| API (Spring Boot) | http://localhost:8080/api |
-| PostgreSQL | `localhost:5432`, banco, usuário e senha: `finansee` |
+| Serviço | Opção A (Docker) | Opção B (desenvolvimento) |
+|---|---|---|
+| Aplicação | http://localhost:8081 | http://localhost:4200 |
+| API | http://localhost:8080/api | http://localhost:8080/api |
+| PostgreSQL | `localhost:5432` | `localhost:5432` |
 
-> As credenciais do banco são apenas para **desenvolvimento local**. Em produção, elas devem vir de variáveis de ambiente, nunca do repositório.
+As credenciais do banco ficam no arquivo `.env` (que não vai para o Git). O `.env.example` é o modelo.
 
 ### Parar
 

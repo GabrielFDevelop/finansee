@@ -1,15 +1,42 @@
-services:                  # lista dos containers que o projeto usa
-  db:                      # nome do serviço (você escolhe)
-    image: postgres:16     # qual imagem usar
-    container_name: finansee-db   # nome do container, para achá-lo fácil
-    environment:           # variáveis de ambiente que a imagem lê ao iniciar
-      POSTGRES_DB: finansee        # cria um banco chamado "finansee"
-      POSTGRES_USER: finansee      # cria esse usuário
-      POSTGRES_PASSWORD: finansee  # define a senha dele
+services:
+  db:
+    image: postgres:16
+    container_name: finansee-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"        # porta-da-sua-máquina : porta-dentro-do-container
+      - "5432:5432"
     volumes:
-      - finansee-data:/var/lib/postgresql/data  # guarda os dados do banco no volume
+      - finansee-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: finansee-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TZ: America/Sao_Paulo
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    container_name: finansee-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"
 
 volumes:
-  finansee-data:           # declara o volume usado acima
+  finansee-data:
