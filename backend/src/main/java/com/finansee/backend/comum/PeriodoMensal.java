@@ -19,6 +19,9 @@ public final class PeriodoMensal {
     if (mes < 1 || mes > 12) {
       throw new RequisicaoInvalidaException("O mês deve estar entre 1 e 12");
     }
+    if (ano < 2000 || ano > 2100) {
+      throw new RequisicaoInvalidaException("O ano deve estar entre 2000 e 2100");
+    }
     return YearMonth.of(ano, mes);
   }
 }

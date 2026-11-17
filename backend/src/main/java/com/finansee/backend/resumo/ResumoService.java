@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.finansee.backend.comum.PeriodoMensal;
 import com.finansee.backend.despesa.DespesaRepository;
 import com.finansee.backend.despesa.TotalPorCategoria;
+import com.finansee.backend.orcamento.OrcamentoMensal;
+import com.finansee.backend.orcamento.OrcamentoMensalRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ResumoService {
 
   private final DespesaRepository despesaRepository;
+  private final OrcamentoMensalRepository orcamentoRepository;
 
   @Transactional(readOnly = true)
   public ResumoMensalResponse resumoDoMes(Integer ano, Integer mes) {
@@ -43,9 +48,33 @@ public class ResumoService {
 
     long quantidade = despesaRepository.countByDataBetween(inicio, fim);
 
+    Map<Long, BigDecimal> gastoPorCategoria = totais.stream()
+        .collect(Collectors.toMap(TotalPorCategoria::categoriaId, TotalPorCategoria::total));
+
+    List<OrcamentoMensal> orcamentos = orcamentoRepository.buscarPorMes(
+        (short) periodo.getYear(), (short) periodo.getMonthValue());
+
+    List<OrcamentoResumo> orcamentosResumo = orcamentos.stream()
+        .map(o -> {
+          BigDecimal gasto = gastoPorCategoria.getOrDefault(
+              o.getCategoria().getId(), BigDecimal.ZERO);
+          return new OrcamentoResumo(
+              o.getCategoria().getId(),
+              o.getCategoria().getNome(),
+              o.getValorLimite(),
+              gasto,
+              percentual(gasto, o.getValorLimite()));
+        })
+        .toList();
+
+    BigDecimal totalOrcado = orcamentos.stream()
+        .map(OrcamentoMensal::getValorLimite)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+
     return new ResumoMensalResponse(
         periodo.getYear(), periodo.getMonthValue(),
-        totalGasto, quantidade, porCategoria);
+        totalGasto, quantidade, porCategoria,
+        totalOrcado, orcamentosResumo);
   }
 
   private BigDecimal percentual(BigDecimal parte, BigDecimal total) {
