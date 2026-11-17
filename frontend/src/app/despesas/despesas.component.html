@@ -1,0 +1,56 @@
+<main class="container pagina">
+  <section class="cartao">
+    <div class="cartao__cabecalho">
+      <div>
+        <h1>Despesas</h1>
+        <p class="rotulo">
+          {{ despesas().length }} {{ despesas().length === 1 ? 'despesa' : 'despesas' }}
+          · {{ total() | currency: 'BRL' }}
+        </p>
+      </div>
+      <button type="button" class="botao-primario" (click)="formulario.abrir()">+ Nova despesa</button>
+    </div>
+
+    @if (erro()) {
+      <p class="aviso" role="alert">{{ erro() }}</p>
+    }
+
+    @if (carregando()) {
+      <p class="aviso">Carregando…</p>
+    } @else if (despesas().length > 0) {
+      <div class="tabela-rolavel">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th scope="col">Data</th>
+              <th scope="col">Descrição</th>
+              <th scope="col">Categoria</th>
+              <th scope="col" class="num">Valor</th>
+              <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (d of despesas(); track d.id) {
+              <tr>
+                <td>{{ d.data | date: 'dd/MM/yyyy' }}</td>
+                <td>{{ d.descricao }}</td>
+                <td>{{ d.categoriaNome }}</td>
+                <td class="num">{{ d.valor | currency: 'BRL' }}</td>
+                <td class="acoes">
+                  <button type="button" class="botao-link" [attr.aria-label]="'Editar ' + d.descricao"
+                          (click)="formulario.abrir(d)">Editar</button>
+                  <button type="button" class="botao-link botao-link--perigo" [attr.aria-label]="'Excluir ' + d.descricao"
+                          (click)="excluir(d)">Excluir</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (!erro()) {
+      <p class="vazio">Nenhuma despesa neste mês.</p>
+    }
+  </section>
+
+  <app-form-despesa #formulario (salva)="recarregar()" />
+</main>

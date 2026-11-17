@@ -16,4 +16,12 @@ export class DespesaService {
   criar(dados: DespesaRequest): Observable<Despesa> {
     return this.http.post<Despesa>(`${API_URL}/despesas`, dados);
   }
+  
+  atualizar(id: number, dados: DespesaRequest): Observable<Despesa> {
+    return this.http.put<Despesa>(`${API_URL}/despesas/${id}`, dados);
+  }
+
+  excluir(id: number): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/despesas/${id}`);
+  }
 }

@@ -6,7 +6,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CategoriaService } from '../../core/categoria.service';
 import { DespesaService } from '../../core/despesa.service';
-import { Categoria, DespesaRequest } from '../../core/modelos';
+import { Categoria, Despesa, DespesaRequest } from '../../core/modelos';
 
 @Component({
   selector: 'app-form-despesa',
@@ -25,6 +25,7 @@ export class FormDespesaComponent implements OnInit {
   protected readonly categorias = signal<Categoria[]>([]);
   protected readonly salvando = signal(false);
   protected readonly erro = signal<string | null>(null);
+  protected readonly editandoId = signal<number | null>(null);
 
   protected readonly form = this.fb.group({
     descricao: ['', [Validators.required, Validators.maxLength(150)]],
@@ -40,8 +41,14 @@ export class FormDespesaComponent implements OnInit {
     });
   }
 
-  abrir(): void {
-    this.form.reset({ descricao: '', valor: null, data: this.hoje(), categoriaId: null });
+  abrir(despesa?: Despesa): void {
+    this.editandoId.set(despesa?.id ?? null);
+    this.form.reset({
+      descricao: despesa?.descricao ?? '',
+      valor: despesa?.valor ?? null,
+      data: despesa?.data ?? this.hoje(),
+      categoriaId: despesa?.categoriaId ?? null,
+    });
     this.erro.set(null);
     this.dialogo.nativeElement.showModal();
   }
@@ -69,10 +76,15 @@ export class FormDespesaComponent implements OnInit {
       categoriaId: valores.categoriaId!,
     };
 
+    const id = this.editandoId();
+    const requisicao = id
+      ? this.despesaService.atualizar(id, dados)
+      : this.despesaService.criar(dados);
+
     this.salvando.set(true);
     this.erro.set(null);
 
-    this.despesaService.criar(dados).subscribe({
+    requisicao.subscribe({
       next: () => {
         this.salvando.set(false);
         this.fechar();

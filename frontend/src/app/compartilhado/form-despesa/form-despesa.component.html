@@ -1,6 +1,6 @@
 <dialog #dialogo class="dialogo" aria-labelledby="titulo-nova-despesa">
   <form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
-    <h2 id="titulo-nova-despesa">Nova despesa</h2>
+    <h2 id="titulo-nova-despesa">{{ editandoId() ? 'Editar despesa' : 'Nova despesa' }}</h2>
 
     <label for="descricao">Descrição</label>
     <input id="descricao" type="text" formControlName="descricao" maxlength="150" />
