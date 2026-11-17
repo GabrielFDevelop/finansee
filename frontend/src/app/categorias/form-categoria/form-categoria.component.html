@@ -1,0 +1,20 @@
+<dialog #dialogo class="dialogo" aria-labelledby="titulo-categoria">
+  <form [formGroup]="form" (ngSubmit)="salvar()" novalidate>
+    <h2 id="titulo-categoria">{{ editandoId() ? 'Editar categoria' : 'Nova categoria' }}</h2>
+
+    <label for="nome-categoria">Nome</label>
+    <input id="nome-categoria" type="text" formControlName="nome" maxlength="80" />
+    @if (invalido()) {
+      <p class="erro-campo">Informe um nome.</p>
+    }
+
+    @if (erro()) {
+      <p class="erro-campo" role="alert">{{ erro() }}</p>
+    }
+
+    <div class="acoes">
+      <button type="button" class="botao-secundario" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="botao-primario" [disabled]="salvando()">Salvar</button>
+    </div>
+  </form>
+</dialog>

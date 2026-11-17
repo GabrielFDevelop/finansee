@@ -1,0 +1,39 @@
+<main class="container pagina">
+  <section class="cartao">
+    <div class="cartao__cabecalho">
+      <div>
+        <h1>Categorias</h1>
+        <p class="rotulo">
+          {{ categorias().length }} {{ categorias().length === 1 ? 'categoria' : 'categorias' }}
+        </p>
+      </div>
+      <button type="button" class="botao-primario" (click)="formulario.abrir()">+ Nova categoria</button>
+    </div>
+
+    @if (erro()) {
+      <p class="aviso" role="alert">{{ erro() }}</p>
+    }
+
+    @if (carregando()) {
+      <p class="aviso">Carregando…</p>
+    } @else if (categorias().length > 0) {
+      <ul class="lista">
+        @for (c of categorias(); track c.id) {
+          <li class="categoria">
+            <span>{{ c.nome }}</span>
+            <span>
+              <button type="button" class="botao-link" [attr.aria-label]="'Editar ' + c.nome"
+                      (click)="formulario.abrir(c)">Editar</button>
+              <button type="button" class="botao-link botao-link--perigo" [attr.aria-label]="'Excluir ' + c.nome"
+                      (click)="excluir(c)">Excluir</button>
+            </span>
+          </li>
+        }
+      </ul>
+    } @else if (!erro()) {
+      <p class="vazio">Nenhuma categoria cadastrada.</p>
+    }
+  </section>
+
+  <app-form-categoria #formulario (salva)="recarregar()" />
+</main>

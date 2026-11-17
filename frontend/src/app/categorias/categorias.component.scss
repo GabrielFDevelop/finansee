@@ -1,0 +1,13 @@
+.lista {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.categoria {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 15px;
+}

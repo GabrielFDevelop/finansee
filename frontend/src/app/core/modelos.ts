@@ -33,3 +33,7 @@ export interface DespesaRequest {
   data: string; // "2026-11-15"
   categoriaId: number;
 }
+
+export interface CategoriaRequest {
+  nome: string;
+}
