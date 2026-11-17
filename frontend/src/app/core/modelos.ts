@@ -11,6 +11,8 @@ export interface ResumoMensal {
   totalGasto: number;
   quantidadeDespesas: number;
   porCategoria: CategoriaResumo[];
+  totalOrcado: number;
+  orcamentos: OrcamentoResumo[];
 }
 
 export interface Despesa {
@@ -36,4 +38,20 @@ export interface DespesaRequest {
 
 export interface CategoriaRequest {
   nome: string;
+}
+
+export interface OrcamentoResumo {
+  categoriaId: number;
+  categoriaNome: string;
+  limite: number;
+  gasto: number;
+  percentualUsado: number;
+}
+
+export interface Orcamento {
+  categoriaId: number;
+  categoriaNome: string;
+  ano: number;
+  mes: number;
+  valorLimite: number;
 }

@@ -9,30 +9,86 @@
 
   @if (resumo(); as r) {
     <div class="grade">
-      <section class="cartao grade__principal">
-        <h2>Gastos por categoria</h2>
+      <div class="coluna">
+        <section class="cartao">
+          <h2>Gastos por categoria</h2>
 
-        @if (r.porCategoria.length > 0) {
-          <div class="categorias">
-            <div class="rosca" [style.background]="gradiente()" aria-hidden="true">
-              <div class="rosca__miolo">
-                <span>Total<br /><strong>{{ r.totalGasto | currency: 'BRL' }}</strong></span>
+          @if (r.porCategoria.length > 0) {
+            <div class="categorias">
+              <div class="rosca" [style.background]="gradiente()" aria-hidden="true">
+                <div class="rosca__miolo">
+                  <span>Total<br /><strong>{{ r.totalGasto | currency: 'BRL' }}</strong></span>
+                </div>
               </div>
-            </div>
 
-            <ul class="legenda">
-              @for (c of r.porCategoria; track c.categoriaId; let i = $index) {
+              <ul class="legenda">
+                @for (c of r.porCategoria; track c.categoriaId; let i = $index) {
+                  <li>
+                    <span><i [style.background]="cor(i)"></i>{{ c.categoriaNome }}</span>
+                    <strong>{{ c.total | currency: 'BRL' }}</strong>
+                  </li>
+                }
+              </ul>
+            </div>
+          } @else {
+            <p class="vazio">Nenhuma despesa neste mês.</p>
+          }
+        </section>
+
+        <section class="cartao">
+          <div class="cartao__cabecalho">
+            <div>
+              <h2>Orçamento do mês</h2>
+              @if (r.orcamentos.length > 0) {
+                <p class="rotulo">
+                  {{ gastoOrcado() | currency: 'BRL' }} de {{ r.totalOrcado | currency: 'BRL' }}
+                </p>
+              }
+            </div>
+            <a routerLink="/orcamento" class="botao-link">
+              {{ r.orcamentos.length > 0 ? 'Gerenciar' : 'Definir limites' }}
+            </a>
+          </div>
+
+          @if (r.orcamentos.length > 0) {
+            <ul class="orcamentos">
+              @for (o of r.orcamentos; track o.categoriaId) {
                 <li>
-                  <span><i [style.background]="cor(i)"></i>{{ c.categoriaNome }}</span>
-                  <strong>{{ c.total | currency: 'BRL' }}</strong>
+                  <div class="orcamento__linha">
+                    <span>{{ o.categoriaNome }}</span>
+                    <span>{{ o.gasto | currency: 'BRL' }} de {{ o.limite | currency: 'BRL' }}</span>
+                  </div>
+                  <div
+                    class="barra"
+                    role="progressbar"
+                    [attr.aria-label]="'Uso do orçamento de ' + o.categoriaNome"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                    [attr.aria-valuenow]="largura(o)"
+                  >
+                    <div
+                      class="barra__preenchimento"
+                      [class.barra__preenchimento--alerta]="estado(o) === 'alerta'"
+                      [class.barra__preenchimento--estourado]="estado(o) === 'estourado'"
+                      [style.width.%]="largura(o)"
+                    ></div>
+                  </div>
+                  <p class="orcamento__situacao" [class.orcamento__situacao--estourado]="estado(o) === 'estourado'">
+                    @if (o.gasto > o.limite) {
+                      Passou {{ o.gasto - o.limite | currency: 'BRL' }}
+                    } @else {
+                      Restam {{ o.limite - o.gasto | currency: 'BRL' }}
+                    }
+                    · {{ o.percentualUsado | number: '1.0-1' }}% usado
+                  </p>
                 </li>
               }
             </ul>
-          </div>
-        } @else {
-          <p class="vazio">Nenhuma despesa neste mês.</p>
-        }
-      </section>
+          } @else {
+            <p class="vazio">Nenhum limite definido para este mês.</p>
+          }
+        </section>
+      </div>
 
       <div class="coluna">
         <section class="cartao">
@@ -66,5 +122,6 @@
       </div>
     </div>
   }
+
   <app-form-despesa #formulario (salva)="recarregar()" />
 </main>

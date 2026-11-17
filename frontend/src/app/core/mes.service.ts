@@ -32,4 +32,8 @@ export class MesService {
     const hoje = new Date();
     return { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
   }
+
+  get atual(): Periodo {
+    return this.estado.value;
+  }
 }

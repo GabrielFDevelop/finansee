@@ -1,0 +1,58 @@
+<main class="container pagina">
+  <section class="cartao">
+    <div>
+      <h1>Orçamento</h1>
+      <p class="rotulo">Limite de gastos por categoria em {{ mes.rotulo$ | async }}</p>
+    </div>
+
+    @if (erro()) {
+      <p class="aviso" role="alert">{{ erro() }}</p>
+    }
+
+    @if (carregando()) {
+      <p class="aviso">Carregando…</p>
+    } @else if (linhas().length > 0) {
+      <div class="tabela-rolavel">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th scope="col">Categoria</th>
+              <th scope="col" class="num">Limite</th>
+              <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of linhas(); track l.categoria.id) {
+              <tr>
+                <td>{{ l.categoria.nome }}</td>
+                <td class="num">
+                  @if (l.limite !== null) {
+                    {{ l.limite | currency: 'BRL' }}
+                  } @else {
+                    <span class="vazio">Sem limite</span>
+                  }
+                </td>
+                <td class="acoes">
+                  <button type="button" class="botao-link"
+                          [attr.aria-label]="(l.limite !== null ? 'Editar' : 'Definir') + ' limite de ' + l.categoria.nome"
+                          (click)="formulario.abrir(l.categoria, l.limite)">
+                    {{ l.limite !== null ? 'Editar' : 'Definir' }}
+                  </button>
+                  @if (l.limite !== null) {
+                    <button type="button" class="botao-link botao-link--perigo"
+                            [attr.aria-label]="'Remover limite de ' + l.categoria.nome"
+                            (click)="remover(l)">Remover</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (!erro()) {
+      <p class="vazio">Nenhuma categoria cadastrada. Crie categorias para definir limites.</p>
+    }
+  </section>
+
+  <app-form-orcamento #formulario (salva)="recarregar()" />
+</main>

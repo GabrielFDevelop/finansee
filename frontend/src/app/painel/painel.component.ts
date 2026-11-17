@@ -1,4 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -7,13 +8,13 @@ import {
 
 import { DespesaService } from '../core/despesa.service';
 import { MesService } from '../core/mes.service';
-import { Despesa, ResumoMensal } from '../core/modelos';
+import { Despesa, OrcamentoResumo, ResumoMensal } from '../core/modelos';
 import { ResumoService } from '../core/resumo.service';
 import { FormDespesaComponent } from '../compartilhado/form-despesa/form-despesa.component';
 
 @Component({
   selector: 'app-painel',
-  imports: [CurrencyPipe, DatePipe, FormDespesaComponent],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink, FormDespesaComponent],
   templateUrl: './painel.component.html',
   styleUrl: './painel.component.scss',
 })
@@ -29,7 +30,9 @@ export class PainelComponent {
   protected readonly erro = signal<string | null>(null);
 
   protected readonly ultimas = computed(() => this.despesas().slice(0, 5));
-
+  protected readonly gastoOrcado = computed(() =>
+    (this.resumo()?.orcamentos ?? []).reduce((soma, o) => soma + o.gasto, 0),
+  );
   protected readonly gradiente = computed(() => {
     const categorias = this.resumo()?.porCategoria ?? [];
     if (categorias.length === 0) {
@@ -77,5 +80,16 @@ export class PainelComponent {
 
   protected cor(indice: number): string {
     return `var(--cat-${(indice % 7) + 1})`;
+  }
+
+  protected estado(orcamento: OrcamentoResumo): 'ok' | 'alerta' | 'estourado' {
+    if (orcamento.gasto > orcamento.limite) {
+      return 'estourado';
+    }
+    return orcamento.percentualUsado >= 80 ? 'alerta' : 'ok';
+  }
+
+  protected largura(orcamento: OrcamentoResumo): number {
+    return Math.min(orcamento.percentualUsado, 100);
   }
 }

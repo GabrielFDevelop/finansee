@@ -182,6 +182,8 @@ button {
 
 // botão com aparência de link (Editar / Excluir)
 .botao-link {
+  display: inline-flex;
+  align-items: center;
   min-height: 44px;
   padding: 0 10px;
   border: 0;
@@ -189,6 +191,7 @@ button {
   background: none;
   color: var(--cat-1);
   font-size: 14px;
+  text-decoration: none;
 
   &:hover {
     text-decoration: underline;
@@ -196,5 +199,35 @@ button {
 
   &--perigo {
     color: #fda4af;
+  }
+}
+
+.tabela-rolavel {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    padding: 12px 8px;
+    border-top: 1px solid var(--cor-borda);
+    text-align: left;
+  }
+
+  th {
+    border-top: 0;
+    color: var(--cor-texto-suave);
+    font-weight: 500;
+  }
+
+  .num,
+  .acoes {
+    text-align: right;
+    white-space: nowrap;
   }
 }
