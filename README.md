@@ -29,6 +29,7 @@ Aplicação web para **gerenciar gastos mensais**: registre despesas, organize p
 | Back-end | Java 21, Spring Boot (Web, Data JPA, Validation), Lombok, Maven |
 | Banco de dados | PostgreSQL 16, migrations com Flyway |
 | Infraestrutura | Docker Compose (banco, API e front-end com nginx) |
+| Testes | JUnit 5, Mockito, AssertJ, Spring Boot Test, Testcontainers |
 
 ## Arquitetura
 
@@ -46,18 +47,25 @@ finansee/
 │   ├── Dockerfile                    # imagem do back-end (build em 2 estágios)
 │   ├── .dockerignore
 │   ├── pom.xml                       # dependências e build (Maven)
-│   └── src/main/
-│       ├── java/com/finansee/backend/
-│       │   ├── categoria/            # entidade, repository, service, controller e DTOs
-│       │   ├── despesa/
-│       │   ├── orcamento/
-│       │   ├── resumo/               # resumo mensal (totais, por categoria, orçamento)
-│       │   ├── comum/                # utilitários compartilhados
-│       │   ├── config/               # CORS
-│       │   └── excecao/              # exceções e tratamento de erros
-│       └── resources/
-│           ├── application.yml
-│           └── db/migration/         # migrations do Flyway
+│   └── src/
+│       ├── main/
+│       │   ├── java/com/finansee/backend/
+│       │   │   ├── categoria/        # entidade, repository, service, controller e DTOs
+│       │   │   ├── despesa/
+│       │   │   ├── orcamento/
+│       │   │   ├── resumo/           # resumo mensal (totais, por categoria, orçamento)
+│       │   │   ├── comum/            # utilitários compartilhados
+│       │   │   ├── config/           # CORS
+│       │   │   └── excecao/          # exceções e tratamento de erros
+│       │   └── resources/
+│       │       ├── application.yml
+│       │       └── db/migration/     # migrations do Flyway
+│       └── test/java/com/finansee/backend/
+│           ├── comum/                # testes unitários de PeriodoMensal
+│           ├── categoria/            # testes unitários de CategoriaService
+│           ├── resumo/               # testes unitários de ResumoService
+│           ├── despesa/              # testes de integração dos repositories
+│           └── TestcontainersConfiguration.java   # PostgreSQL descartável nos testes
 ├── frontend/                         # aplicação Angular
 │   ├── Dockerfile                    # imagem do front-end (build + nginx)
 │   ├── nginx.conf                    # serve o Angular e repassa /api ao back-end
@@ -216,6 +224,41 @@ O esquema é versionado com **Flyway**, em `backend/src/main/resources/db/migrat
 
 Uma migration já aplicada nunca é editada. Mudanças no banco entram como uma nova versão (`V3__...`, `V4__...`).
 
+## Testes
+
+O back-end possui testes unitários e de integração.
+
+| Tipo | O que cobre | Ferramentas |
+|---|---|---|
+| Unitários | Regras de negócio isoladas: validação do período (`PeriodoMensal`), cálculos do resumo e do orçamento (`ResumoService`) e regras de categoria (`CategoriaService`) | JUnit 5, Mockito, AssertJ |
+| Integração | Consultas JPQL, migrations do Flyway e mapeamento das entidades, executados contra um PostgreSQL real | Spring Boot Test, Testcontainers |
+
+### Como executar
+
+Os testes de integração sobem um PostgreSQL descartável em um container, então o **Docker precisa estar em execução**.
+
+```bash
+cd backend
+./mvnw test
+```
+
+No Windows (PowerShell), use `.\mvnw.cmd test`.
+
+Para rodar uma única classe de teste:
+
+```bash
+./mvnw test -Dtest=ResumoServiceTest
+```
+
+> O build das imagens Docker (`docker compose up --build`) não executa os testes, que rodam separadamente com o comando acima.
+
+### O que os testes protegem
+
+- **Valores de fronteira:** mês 0, 1, 12 e 13, e o primeiro e o último dia de cada mês nas consultas por período.
+- **Cálculos com dinheiro:** divisão por zero, arredondamento de `BigDecimal` e percentual acima de 100% quando o limite é estourado.
+- **Regras de negócio:** nome de categoria duplicado, atualização mantendo o próprio nome, recurso inexistente.
+- **Banco de dados:** as migrations são aplicadas, as entidades batem com as tabelas e as consultas com `group by` e `join fetch` retornam o esperado.
+
 ## Decisões de projeto
 
 - **Dinheiro com precisão exata:** `NUMERIC(12,2)` no banco e `BigDecimal` no Java, evitando erros de arredondamento do ponto flutuante.
@@ -226,6 +269,7 @@ Uma migration já aplicada nunca é editada. Mudanças no banco entram como uma 
 - **Consultas eficientes:** `join fetch` evita o problema N+1, e as somas por categoria são feitas no banco.
 - **Front-end reativo:** signals para o estado dos componentes e RxJS com `switchMap`, que cancela requisições antigas quando o mês muda.
 - **Sem biblioteca de componentes:** estilos próprios em SCSS, com cores definidas como variáveis CSS, tema escuro, modais com `<dialog>` nativo e atenção à acessibilidade (rótulos, `aria-label`, barras de progresso semânticas).
+- **Testes contra o banco real:** Testcontainers em vez de banco em memória, para validar consultas, migrations e entidades no mesmo PostgreSQL usado na aplicação.
 
 ## Convenções de commit
 
@@ -241,7 +285,9 @@ O projeto segue o padrão [Conventional Commits](https://www.conventionalcommits
 
 ## Próximos passos
 
-- [ ] Dockerizar a aplicação inteira (back-end e front-end no docker-compose)
+- [ ] Testes da camada web (controllers) e do front-end
+- [ ] Integração contínua (GitHub Actions)
+- [ ] Login e múltiplos usuários
 
 ## Autor
 
