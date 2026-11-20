@@ -232,6 +232,7 @@ O back-end possui testes unitários e de integração.
 |---|---|---|
 | Unitários | Regras de negócio isoladas: validação do período (`PeriodoMensal`), cálculos do resumo e do orçamento (`ResumoService`) e regras de categoria (`CategoriaService`) | JUnit 5, Mockito, AssertJ |
 | Integração | Consultas JPQL, migrations do Flyway e mapeamento das entidades, executados contra um PostgreSQL real | Spring Boot Test, Testcontainers |
+| Camada web | Contrato HTTP dos controllers: rotas, status (201, 204, 400, 404, 409), validação, formato do JSON e tratamento de erros, sem banco | `@WebMvcTest`, MockMvc |
 
 ### Como executar
 
@@ -258,6 +259,7 @@ Para rodar uma única classe de teste:
 - **Cálculos com dinheiro:** divisão por zero, arredondamento de `BigDecimal` e percentual acima de 100% quando o limite é estourado.
 - **Regras de negócio:** nome de categoria duplicado, atualização mantendo o próprio nome, recurso inexistente.
 - **Banco de dados:** as migrations são aplicadas, as entidades batem com as tabelas e as consultas com `group by` e `join fetch` retornam o esperado.
+- **Contrato com o front-end:** os nomes e formatos do JSON da API e os códigos de status de cada operação.
 
 ## Decisões de projeto
 
