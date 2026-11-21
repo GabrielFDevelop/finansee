@@ -233,6 +233,7 @@ O back-end possui testes unitários e de integração.
 | Unitários | Regras de negócio isoladas: validação do período (`PeriodoMensal`), cálculos do resumo e do orçamento (`ResumoService`) e regras de categoria (`CategoriaService`) | JUnit 5, Mockito, AssertJ |
 | Integração | Consultas JPQL, migrations do Flyway e mapeamento das entidades, executados contra um PostgreSQL real | Spring Boot Test, Testcontainers |
 | Camada web | Contrato HTTP dos controllers: rotas, status (201, 204, 400, 404, 409), validação, formato do JSON e tratamento de erros, sem banco | `@WebMvcTest`, MockMvc |
+| Front-end | Services HTTP (contrato com a API), lógica do mês selecionado, painel (estados do orçamento) e formulário de despesa (validação, edição e erros da API) | Jasmine, Karma, TestBed, HttpTestingController |
 
 ### Como executar
 
@@ -252,6 +253,15 @@ Para rodar uma única classe de teste:
 ```
 
 > O build das imagens Docker (`docker compose up --build`) não executa os testes, que rodam separadamente com o comando acima.
+
+Testes do front-end:
+
+```bash
+cd frontend
+ng test
+```
+
+Para uma execução única, sem observar mudanças: `ng test --watch=false --browsers=ChromeHeadless`.
 
 ### O que os testes protegem
 
