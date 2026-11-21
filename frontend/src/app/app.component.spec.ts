@@ -1,29 +1,29 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [AppComponent],
-    }).compileComponents();
+      providers: [provideRouter([])],
+    });
   });
 
-  it('should create the app', () => {
+  it('cria o componente raiz', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it(`should have the 'frontend' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('frontend');
-  });
-
-  it('should render title', () => {
+  it('mostra o cabeçalho com o menu de navegação', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, frontend');
+    const el = fixture.nativeElement as HTMLElement;
+
+    expect(el.querySelector('app-cabecalho')).not.toBeNull();
+    const links = Array.from(el.querySelectorAll('nav a')).map((a) => a.textContent?.trim());
+    expect(links).toEqual(['Painel', 'Despesas', 'Orçamento', 'Categorias']);
   });
 });
