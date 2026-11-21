@@ -6,6 +6,7 @@ Aplicação web para **gerenciar gastos mensais**: registre despesas, organize p
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-API%20REST-6DB33F)
 ![Angular](https://img.shields.io/badge/Angular-front--end-DD0031)
 ![PostgreSQL 16](https://img.shields.io/badge/PostgreSQL-16-336791)
+[![CI](https://github.com/GabrielFDevelop/finansee/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU-USUARIO/finansee/actions/workflows/ci.yml)
 
 > Projeto pessoal de estudo, em desenvolvimento. Por enquanto é de **um único usuário**, sem login.
 
@@ -262,6 +263,14 @@ ng test
 ```
 
 Para uma execução única, sem observar mudanças: `ng test --watch=false --browsers=ChromeHeadless`.
+
+### Integração contínua
+
+A cada `push` e *pull request* para a `main`, o GitHub Actions executa o workflow `.github/workflows/ci.yml`:
+
+1. **Back-end:** testes unitários, da camada web e de integração (com Testcontainers).
+2. **Front-end:** testes (Jasmine/Karma em Chrome headless) e build de produção.
+3. **Docker:** sobe o `docker-compose` completo e verifica, com requisições reais, a API, o proxy do nginx, as migrations e as rotas do Angular.
 
 ### O que os testes protegem
 
